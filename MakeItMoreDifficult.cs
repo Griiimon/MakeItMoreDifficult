@@ -13,8 +13,10 @@ using System.Runtime.InteropServices.ComTypes;
 using Unity.Jobs.LowLevel.Unsafe;
 using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Persistence.Datas;
+using System.Collections.Generic;
+using Harmony;
 
-[assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.0.1", "Griiimon")]
+[assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.2.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
 
 
@@ -41,6 +43,7 @@ namespace MakeItMoreDifficult
 
 		private static Vector3 DefaultPosition = new Vector3(550f, 510f, 0f);
 
+		public static Dictionary<Customer, float> customer_orig_spending= new Dictionary<Customer, float>();
 
 
 		public override void OnInitializeMelon()
@@ -58,17 +61,6 @@ namespace MakeItMoreDifficult
 			if (flag)
 			{
 	
-                int day = 1;
-
-                foreach (Customer customer in Customer.UnlockedCustomers)
-                {
-					MelonLogger.Msg("Max Spend " + customer.CustomerData.MaxWeeklySpend);
-
-                    customer.customerData.MinWeeklySpend = day * 1000;
-                    customer.customerData.MaxWeeklySpend = day * 2000;
-				}
-
-
 				this.InMainGame = true;
 				MelonCoroutines.Start(Core.WaitForPlayer());
 			}
@@ -84,6 +76,7 @@ namespace MakeItMoreDifficult
 			if (Input.GetKeyDown(KeyCode.P))
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
+				UpdateCustomerSpending();
 			}
 
 			if (Input.GetKeyDown(KeyCode.L))
@@ -150,6 +143,27 @@ namespace MakeItMoreDifficult
 			Core.DayText.text = "Day #" + day.ToString() + " | $" + tax + " ( +$" + rent + " = $" + debt + " )";
 		}
 
-	}
+
+		private static void UpdateCustomerSpending()
+		{
+			int day = 50;
+
+			foreach (Customer customer in Customer.UnlockedCustomers)
+			{
+				if (!customer_orig_spending.ContainsKey(customer))
+				{
+					customer_orig_spending.Add(customer, customer.CustomerData.MaxWeeklySpend);
+					MelonLogger.Msg("  " + customer.name + " Orig Max Spend " + customer.CustomerData.MaxWeeklySpend);
+				}
+
+				if (customer_orig_spending.TryGetValue(customer, out float orig_value))
+				{
+					customer.customerData.MaxWeeklySpend = Mathf.Max(1f, Mathf.Pow(day, 1.5f) / 100f) * orig_value;
+					MelonLogger.Msg("-> New Max Spend " + customer.CustomerData.MaxWeeklySpend);
+
+				}
+			}
+        }
+    }
 
 }
