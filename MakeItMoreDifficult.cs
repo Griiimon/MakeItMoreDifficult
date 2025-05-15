@@ -117,13 +117,11 @@ namespace MakeItMoreDifficult
 				Core.DayUIElement.SetActive(true);
 				Core.DayUIElement.name = "MakeItMoreDifficult";
 				Core.DayText = GameObject.Find("UI/HUD/MakeItMoreDifficult/TopScreenText").GetComponent<TextMeshProUGUI>();
-				TimeManager TManager = Object.FindObjectOfType<TimeManager>();
-				TManager.onDayPass += new Action(Core.ChangeDayText);
-				UpdateText(TManager);
+				GetTimeManager().onDayPass += new Action(Core.ChangeDayText);
+				UpdateText(GetTimeManager());
 
 				ParentObj = null;
 				SavedPosition = default(Vector3);
-				TManager = null;
 			}
 			yield break;
 		}
@@ -146,7 +144,7 @@ namespace MakeItMoreDifficult
 
 		private static void UpdateCustomerSpending()
 		{
-			int day = 50;
+			int day = GetTimeManager().ElapsedDays + 1;
 
 			foreach (Customer customer in Customer.UnlockedCustomers)
 			{
@@ -163,6 +161,12 @@ namespace MakeItMoreDifficult
 
 				}
 			}
+        }
+		
+		private static TimeManager GetTimeManager()
+		{
+			return Object.FindObjectOfType<TimeManager>();
+
         }
     }
 
