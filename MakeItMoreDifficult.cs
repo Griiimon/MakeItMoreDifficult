@@ -80,13 +80,6 @@ namespace MakeItMoreDifficult
 				GetOwnedProperties();
 				UpdateCustomerSpending();
 			}
-
-			if (Input.GetKeyDown(KeyCode.L))
-				foreach (Customer customer in Customer.UnlockedCustomers)
-				{
-					customer.CustomerData.MaxWeeklySpend = 10000;
-					MelonLogger.Msg("Max Spend " + customer.CustomerData.MaxWeeklySpend);
-				}
         }
 
 
@@ -153,14 +146,13 @@ namespace MakeItMoreDifficult
 				if (!customer_orig_spending.ContainsKey(customer))
 				{
 					customer_orig_spending.Add(customer, customer.CustomerData.MaxWeeklySpend);
-					MelonLogger.Msg("  " + customer.name + " Orig Max Spend " + customer.CustomerData.MaxWeeklySpend);
+					MelonLogger.Msg("!!  " + customer.name + ": Orig Max Spend " + customer.CustomerData.MaxWeeklySpend);
 				}
 
 				if (customer_orig_spending.TryGetValue(customer, out float orig_value))
 				{
 					customer.customerData.MaxWeeklySpend = Mathf.Max(1f, Mathf.Pow(day, 1.5f) / 100f) * orig_value;
-					MelonLogger.Msg("-> New Max Spend " + customer.CustomerData.MaxWeeklySpend);
-
+					MelonLogger.Msg(customer.name + ": New Max Spend " + customer.CustomerData.MaxWeeklySpend);
 				}
 			}
         }
