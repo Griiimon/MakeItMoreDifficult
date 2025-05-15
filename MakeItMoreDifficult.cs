@@ -15,6 +15,7 @@ using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Persistence.Datas;
 using System.Collections.Generic;
 using Harmony;
+using Il2CppScheduleOne.Property;
 
 [assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.2.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
@@ -76,6 +77,7 @@ namespace MakeItMoreDifficult
 			if (Input.GetKeyDown(KeyCode.P))
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
+				GetOwnedProperties();
 				UpdateCustomerSpending();
 			}
 
@@ -162,6 +164,20 @@ namespace MakeItMoreDifficult
 				}
 			}
         }
+
+		private static List<Property> GetOwnedProperties()
+		{
+			var result = new List<Property>();
+			foreach(Property property in Property.Properties)
+			{
+				if (property.IsOwned)
+				{
+					result.Add(property);
+                    MelonLogger.Msg("Player owns" + property.propertyName);
+                }
+            }
+			return result;
+		}
 		
 		private static TimeManager GetTimeManager()
 		{
