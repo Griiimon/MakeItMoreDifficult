@@ -46,12 +46,20 @@ namespace MakeItMoreDifficult
 
 		public static Dictionary<Customer, float> customer_orig_spending= new Dictionary<Customer, float>();
 
+		public static Dictionary<string, int> PropertyValues = new Dictionary<string, int>();
 
 		public override void OnInitializeMelon()
 		{
 			instance= this;
 
-			base.LoggerInstance.Msg("MakeItMoreDifficult mod loaded successfully!!");
+			PropertyValues.Add("Motel Room", 75);
+            PropertyValues.Add("Sweatshop", 800);
+            PropertyValues.Add("Storage Unit", 5000);
+            PropertyValues.Add("Bungalow", 6000);
+            PropertyValues.Add("Barn", 25000);
+            PropertyValues.Add("Docks Warehouse", 50000);
+
+            base.LoggerInstance.Msg("Loaded successfully!!");
 			Core.ConfigCategory = MelonPreferences.CreateCategory("MakeItMoreDifficult");
 
 		}
@@ -77,7 +85,7 @@ namespace MakeItMoreDifficult
 			if (Input.GetKeyDown(KeyCode.P))
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
-				GetOwnedProperties();
+				UpdateRent();
 				UpdateCustomerSpending();
 			}
         }
@@ -94,6 +102,10 @@ namespace MakeItMoreDifficult
 			{
 				Core.HasPlayerSpawned = true;
 				MelonCoroutines.Start(Core.OnPlayerSpawned());
+
+				UpdateRent();
+				UpdateCustomerSpending();
+			
 			}
 			yield break;
 		}
@@ -157,7 +169,19 @@ namespace MakeItMoreDifficult
 			}
         }
 
-		private static List<Property> GetOwnedProperties()
+		private static void UpdateRent()
+		{
+			var list = GetOwnedProperties();
+			rent = 0;
+			foreach(var property in list)
+			{
+				PropertyValues.TryGetValue(property.propertyName, out int PropertyValue);
+				rent+= PropertyValue;
+			}
+        }
+
+
+        private static List<Property> GetOwnedProperties()
 		{
 			var result = new List<Property>();
 			foreach(Property property in Property.Properties)
