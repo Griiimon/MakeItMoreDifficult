@@ -41,7 +41,6 @@ namespace MakeItMoreDifficult
 
 		private static Vector3 DefaultPosition = new Vector3(550f, 510f, 0f);
 
-		public static bool payNow = false;
 
 
 		public override void OnInitializeMelon()
@@ -82,10 +81,9 @@ namespace MakeItMoreDifficult
 
 		public override void OnUpdate()
 		{
-			if (payNow || Input.GetKeyDown(KeyCode.P))
+			if (Input.GetKeyDown(KeyCode.P))
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
-				payNow = false;
 			}
 
 			if (Input.GetKeyDown(KeyCode.L))
@@ -108,7 +106,6 @@ namespace MakeItMoreDifficult
 			{
 				Core.HasPlayerSpawned = true;
 				MelonCoroutines.Start(Core.OnPlayerSpawned());
-				//ClassInjector.RegisterTypeInIl2Cpp<UIDragging>();
 			}
 			yield break;
 		}
@@ -130,7 +127,7 @@ namespace MakeItMoreDifficult
 				TimeManager TManager = Object.FindObjectOfType<TimeManager>();
 				TManager.onDayPass += new Action(Core.ChangeDayText);
 				UpdateText(TManager);
-				//Core.DayUIElement.AddComponent<UIDragging>();
+
 				ParentObj = null;
 				SavedPosition = default(Vector3);
 				TManager = null;
