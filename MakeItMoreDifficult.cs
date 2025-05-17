@@ -94,10 +94,7 @@ namespace MakeItMoreDifficult
             if (Input.GetKeyDown(KeyCode.L))
                 UpdateCalculations();
             else if (Input.GetKeyDown(KeyCode.P))
-			{
 				Console.SubmitCommand("changecash -" + Core.debt);
-				UpdateCalculations();
-			}
         }
 
 
@@ -140,7 +137,8 @@ namespace MakeItMoreDifficult
 				Core.DayUIElement.SetActive(true);
 				Core.DayUIElement.name = "MakeItMoreDifficult";
 				Core.DayText = GameObject.Find("UI/HUD/MakeItMoreDifficult/TopScreenText").GetComponent<TextMeshProUGUI>();
-				GetTimeManager().onDayPass += new Action(Core.ChangeDayText);
+                GetTimeManager().onDayPass += new Action(Core.UpdateCalculations);
+                GetTimeManager().onDayPass += new Action(Core.ChangeDayText);
 				UpdateText(GetTimeManager());
 
 				ParentObj = null;
@@ -151,7 +149,7 @@ namespace MakeItMoreDifficult
 
 		private static void ChangeDayText()
 		{
-			TimeManager timeManager = Object.FindObjectOfType<TimeManager>();
+			TimeManager timeManager = GetTimeManager();
 			if(timeManager != null)
 				UpdateText(timeManager);
 		}
