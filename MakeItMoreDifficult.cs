@@ -16,6 +16,8 @@ using Il2CppScheduleOne.Persistence.Datas;
 using System.Collections.Generic;
 using Harmony;
 using Il2CppScheduleOne.Property;
+using Il2CppScheduleOne.Persistence;
+using UnityEngine.Events;
 
 [assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.2.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
@@ -69,9 +71,11 @@ namespace MakeItMoreDifficult
 			bool flag = sceneName == "Main";
 			if (flag)
 			{
-	
 				this.InMainGame = true;
-				MelonCoroutines.Start(Core.WaitForPlayer());
+
+				//LoadManager.Instance.onLoadComplete.AddListener((UnityAction)UpdateCalculations);
+
+                MelonCoroutines.Start(Core.WaitForPlayer());
 			}
 			else
 			{
@@ -80,13 +84,19 @@ namespace MakeItMoreDifficult
 			}
 		}
 
-		public override void OnUpdate()
+        public override void OnLateInitializeMelon()
+        {
+            LoadManager.Instance.onLoadComplete.AddListener((UnityAction)UpdateCalculations);
+        }
+
+        public override void OnUpdate()
 		{
-			if (Input.GetKeyDown(KeyCode.P))
+            if (Input.GetKeyDown(KeyCode.L))
+                UpdateCalculations();
+            else if (Input.GetKeyDown(KeyCode.P))
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
-				UpdateRent();
-				UpdateCustomerSpending();
+				UpdateCalculations();
 			}
         }
 
@@ -103,14 +113,20 @@ namespace MakeItMoreDifficult
 				Core.HasPlayerSpawned = true;
 				MelonCoroutines.Start(Core.OnPlayerSpawned());
 
-				UpdateRent();
-				UpdateCustomerSpending();
-			
 			}
 			yield break;
 		}
 
-		private static IEnumerator OnPlayerSpawned()
+
+		private static void UpdateCalculations()
+		{
+			MelonLogger.Msg("Update Calculations");
+            UpdateRent();
+			ChangeDayText();
+			UpdateCustomerSpending();
+        }
+
+        private static IEnumerator OnPlayerSpawned()
 		{
 			yield return new WaitForSeconds(1f);
 			bool flag = Player.Local.gameObject != null;
@@ -136,7 +152,8 @@ namespace MakeItMoreDifficult
 		private static void ChangeDayText()
 		{
 			TimeManager timeManager = Object.FindObjectOfType<TimeManager>();
-			UpdateText(timeManager);
+			if(timeManager != null)
+				UpdateText(timeManager);
 		}
 
 
@@ -192,7 +209,7 @@ namespace MakeItMoreDifficult
 				if (property.IsOwned)
 				{
 					result.Add(property);
-                    MelonLogger.Msg("Player owns" + property.propertyName);
+                    MelonLogger.Msg("Player owns " + property.propertyName);
                 }
             }
 			return result;
