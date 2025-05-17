@@ -10,6 +10,8 @@
   <HintPath>D:\SteamLibrary\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
 </Reference> <Reference Include="UnityEngine.CoreModule"> <HintPath>D:/SteamLibrary/steamapps/common/Schedule I/MelonLoader/Il2CppAssemblies/UnityEngine.CoreModule.dll</HintPath> </Reference> <Reference Include="UnityEngine.InputLegacyModule">
   <HintPath>D:\SteamLibrary\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
+</Reference> <Reference Include="UnityEngine.UI">
+  <HintPath>D:\SteamLibrary\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
 </Reference> <Reference Include="UnityEngine.UIModule">
   <HintPath>D:\SteamLibrary\steamapps\common\Schedule I\MelonLoader\Il2CppAssemblies\UnityEngine.UIModule.dll</HintPath>
 </Reference> </ItemGroup> </Project>

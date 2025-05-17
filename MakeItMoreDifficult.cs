@@ -18,8 +18,9 @@ using Harmony;
 using Il2CppScheduleOne.Property;
 using Il2CppScheduleOne.Persistence;
 using UnityEngine.Events;
+using Il2CppScheduleOne.UI;
 
-[assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.2.0", "Griiimon")]
+[assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.3.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
 
 
@@ -33,6 +34,8 @@ namespace MakeItMoreDifficult
 		private static int rent= 6000;
 
 		public static int debt= 0;
+
+		private static bool HasPayedToday = false;
 
 		private static bool HasPlayerSpawned;
 
@@ -49,6 +52,9 @@ namespace MakeItMoreDifficult
 		public static Dictionary<Customer, float> customer_orig_spending= new Dictionary<Customer, float>();
 
 		public static Dictionary<string, int> PropertyValues = new Dictionary<string, int>();
+
+		public static SleepCanvas sleepCanvas= null;
+
 
 		public override void OnInitializeMelon()
 		{
@@ -73,7 +79,6 @@ namespace MakeItMoreDifficult
 			{
 				this.InMainGame = true;
 
-				//LoadManager.Instance.onLoadComplete.AddListener((UnityAction)UpdateCalculations);
 
                 MelonCoroutines.Start(Core.WaitForPlayer());
 			}
@@ -86,15 +91,22 @@ namespace MakeItMoreDifficult
 
         public override void OnLateInitializeMelon()
         {
-            LoadManager.Instance.onLoadComplete.AddListener((UnityAction)UpdateCalculations);
+			LoadManager.Instance.onLoadComplete.AddListener((UnityAction)UpdateCalculations);
         }
 
         public override void OnUpdate()
 		{
-            if (Input.GetKeyDown(KeyCode.L))
-                UpdateCalculations();
-            else if (Input.GetKeyDown(KeyCode.P))
+            // TODO run only on server
+            
+			if (Input.GetKeyDown(KeyCode.L))
+				UpdateCalculations();
+
+			else if (Input.GetKeyDown(KeyCode.P) && !HasPayedToday)
+			{
 				Console.SubmitCommand("changecash -" + Core.debt);
+				HasPayedToday = true;
+                SetSleepButtonEnabled(true);
+            }
         }
 
 
@@ -137,17 +149,41 @@ namespace MakeItMoreDifficult
 				Core.DayUIElement.SetActive(true);
 				Core.DayUIElement.name = "MakeItMoreDifficult";
 				Core.DayText = GameObject.Find("UI/HUD/MakeItMoreDifficult/TopScreenText").GetComponent<TextMeshProUGUI>();
-                GetTimeManager().onDayPass += new Action(Core.UpdateCalculations);
-                GetTimeManager().onDayPass += new Action(Core.ChangeDayText);
+                GetTimeManager().onDayPass += new Action(Core.OnDayPass);
 				UpdateText(GetTimeManager());
 
 				ParentObj = null;
 				SavedPosition = default(Vector3);
 			}
-			yield break;
+
+			
+            SetSleepButtonEnabled(false);
+
+
+            yield break;
 		}
 
-		private static void ChangeDayText()
+		private static void OnDayPass()
+		{
+			UpdateCalculations();
+            ChangeDayText();
+			HasPayedToday = false;
+			SetSleepButtonEnabled(false);
+        }
+
+		private static void SetSleepButtonEnabled(bool flag)
+		{
+			// TODO run only on server
+			if(sleepCanvas == null)
+			{
+                sleepCanvas = Object.FindObjectOfType<SleepCanvas>();
+            }
+
+            MelonLogger.Msg("Set sleep button " + flag);
+			sleepCanvas.SleepButton.interactable = flag;
+        }
+
+        private static void ChangeDayText()
 		{
 			TimeManager timeManager = GetTimeManager();
 			if(timeManager != null)
@@ -197,6 +233,11 @@ namespace MakeItMoreDifficult
 
 			MelonLogger.Msg("Current Rent: " + rent);
         }
+
+		private static void UpdateStations()
+		{
+			//Il2CppScheduleOne.UI.Stations.LabOvenCanvas.instance.CanBegin()
+		}
 
 
         private static List<Property> GetOwnedProperties()
