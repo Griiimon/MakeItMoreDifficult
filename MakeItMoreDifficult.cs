@@ -19,6 +19,7 @@ using Il2CppScheduleOne.Property;
 using Il2CppScheduleOne.Persistence;
 using UnityEngine.Events;
 using Il2CppScheduleOne.UI;
+using Il2CppFishNet;
 
 [assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.3.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
@@ -96,7 +97,8 @@ namespace MakeItMoreDifficult
 
         public override void OnUpdate()
 		{
-            // TODO run only on server
+			if (!IsServer())
+				return;
             
 			if (Input.GetKeyDown(KeyCode.L))
 				UpdateCalculations();
@@ -173,7 +175,9 @@ namespace MakeItMoreDifficult
 
 		private static void SetSleepButtonEnabled(bool flag)
 		{
-			// TODO run only on server
+			if (!IsServer())
+				return;
+
 			if(sleepCanvas == null)
 			{
                 sleepCanvas = Object.FindObjectOfType<SleepCanvas>();
@@ -258,6 +262,12 @@ namespace MakeItMoreDifficult
 		{
 			return Object.FindObjectOfType<TimeManager>();
 
+        }
+
+		private static bool IsServer()
+		{
+            var nm = InstanceFinder.NetworkManager;
+			return nm.IsServer;
         }
     }
 
