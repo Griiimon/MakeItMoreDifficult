@@ -14,12 +14,13 @@ using Unity.Jobs.LowLevel.Unsafe;
 using Il2CppScheduleOne.Economy;
 using Il2CppScheduleOne.Persistence.Datas;
 using System.Collections.Generic;
-using Harmony;
 using Il2CppScheduleOne.Property;
 using Il2CppScheduleOne.Persistence;
 using UnityEngine.Events;
 using Il2CppScheduleOne.UI;
 using Il2CppFishNet;
+using Il2CppScheduleOne.UI.Stations;
+using HarmonyLib;
 
 [assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.3.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
@@ -28,13 +29,13 @@ using Il2CppFishNet;
 namespace MakeItMoreDifficult
 {
 
-    public class Core : MelonMod
+	public class Core : MelonMod
 	{
-		public static Core instance= null;
+		public static Core instance = null;
 
-		private static int rent= 6000;
+		private static int rent = 6000;
 
-		public static int debt= 0;
+		public static int debt = 0;
 
 		private static bool HasPayedToday = false;
 
@@ -50,25 +51,25 @@ namespace MakeItMoreDifficult
 
 		private static Vector3 DefaultPosition = new Vector3(550f, 510f, 0f);
 
-		public static Dictionary<Customer, float> customer_orig_spending= new Dictionary<Customer, float>();
+		public static Dictionary<Customer, float> customer_orig_spending = new Dictionary<Customer, float>();
 
 		public static Dictionary<string, int> PropertyValues = new Dictionary<string, int>();
 
-		public static SleepCanvas sleepCanvas= null;
+		public static SleepCanvas sleepCanvas = null;
 
 
 		public override void OnInitializeMelon()
 		{
-			instance= this;
+			instance = this;
 
 			PropertyValues.Add("Motel Room", 75);
-            PropertyValues.Add("Sweatshop", 800);
-            PropertyValues.Add("Storage Unit", 5000);
-            PropertyValues.Add("Bungalow", 6000);
-            PropertyValues.Add("Barn", 25000);
-            PropertyValues.Add("Docks Warehouse", 50000);
+			PropertyValues.Add("Sweatshop", 800);
+			PropertyValues.Add("Storage Unit", 5000);
+			PropertyValues.Add("Bungalow", 6000);
+			PropertyValues.Add("Barn", 25000);
+			PropertyValues.Add("Docks Warehouse", 50000);
 
-            base.LoggerInstance.Msg("Loaded successfully!!");
+			base.LoggerInstance.Msg("Loaded successfully!!");
 			Core.ConfigCategory = MelonPreferences.CreateCategory("MakeItMoreDifficult");
 
 		}
@@ -81,7 +82,7 @@ namespace MakeItMoreDifficult
 				this.InMainGame = true;
 
 
-                MelonCoroutines.Start(Core.WaitForPlayer());
+				MelonCoroutines.Start(Core.WaitForPlayer());
 			}
 			else
 			{
@@ -90,16 +91,16 @@ namespace MakeItMoreDifficult
 			}
 		}
 
-        public override void OnLateInitializeMelon()
-        {
+		public override void OnLateInitializeMelon()
+		{
 			LoadManager.Instance.onLoadComplete.AddListener((UnityAction)UpdateCalculations);
-        }
+		}
 
-        public override void OnUpdate()
+		public override void OnUpdate()
 		{
 			if (!IsServer())
 				return;
-            
+
 			if (Input.GetKeyDown(KeyCode.L))
 				UpdateCalculations();
 
@@ -107,12 +108,12 @@ namespace MakeItMoreDifficult
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
 				HasPayedToday = true;
-                SetSleepButtonEnabled(true);
-            }
-        }
+				SetSleepButtonEnabled(true);
+			}
+		}
 
 
-        private static IEnumerator WaitForPlayer()
+		private static IEnumerator WaitForPlayer()
 		{
 			while (Player.Local == null || Player.Local.gameObject == null)
 			{
@@ -132,12 +133,12 @@ namespace MakeItMoreDifficult
 		private static void UpdateCalculations()
 		{
 			MelonLogger.Msg("Update Calculations");
-            UpdateRent();
+			UpdateRent();
 			ChangeDayText();
 			UpdateCustomerSpending();
-        }
+		}
 
-        private static IEnumerator OnPlayerSpawned()
+		private static IEnumerator OnPlayerSpawned()
 		{
 			yield return new WaitForSeconds(1f);
 			bool flag = Player.Local.gameObject != null;
@@ -151,46 +152,46 @@ namespace MakeItMoreDifficult
 				Core.DayUIElement.SetActive(true);
 				Core.DayUIElement.name = "MakeItMoreDifficult";
 				Core.DayText = GameObject.Find("UI/HUD/MakeItMoreDifficult/TopScreenText").GetComponent<TextMeshProUGUI>();
-                GetTimeManager().onDayPass += new Action(Core.OnDayPass);
+				GetTimeManager().onDayPass += new Action(Core.OnDayPass);
 				UpdateText(GetTimeManager());
 
 				ParentObj = null;
 				SavedPosition = default(Vector3);
 			}
 
-			
-            SetSleepButtonEnabled(false);
+
+			SetSleepButtonEnabled(false);
 
 
-            yield break;
+			yield break;
 		}
 
 		private static void OnDayPass()
 		{
 			UpdateCalculations();
-            ChangeDayText();
+			ChangeDayText();
 			HasPayedToday = false;
 			SetSleepButtonEnabled(false);
-        }
+		}
 
 		private static void SetSleepButtonEnabled(bool flag)
 		{
 			if (!IsServer())
 				return;
 
-			if(sleepCanvas == null)
+			if (sleepCanvas == null)
 			{
-                sleepCanvas = Object.FindObjectOfType<SleepCanvas>();
-            }
+				sleepCanvas = Object.FindObjectOfType<SleepCanvas>();
+			}
 
-            MelonLogger.Msg("Set sleep button " + flag);
+			MelonLogger.Msg("Set sleep button " + flag);
 			sleepCanvas.SleepButton.interactable = flag;
-        }
+		}
 
-        private static void ChangeDayText()
+		private static void ChangeDayText()
 		{
 			TimeManager timeManager = GetTimeManager();
-			if(timeManager != null)
+			if (timeManager != null)
 				UpdateText(timeManager);
 		}
 
@@ -198,8 +199,8 @@ namespace MakeItMoreDifficult
 		private static void UpdateText(TimeManager timeManager)
 		{
 			int day = timeManager.ElapsedDays + 1;
-			int tax= (int)(Mathf.Floor(Mathf.Pow(day * 5, 1.5f) / 5.0f) * 5);
-			debt= tax + rent;
+			int tax = (int)(Mathf.Floor(Mathf.Pow(day * 5, 1.5f) / 5.0f) * 5);
+			debt = tax + rent;
 			Core.DayText.text = "Day #" + day.ToString() + " | $" + tax + " ( +$" + rent + " = $" + debt + " )";
 		}
 
@@ -223,52 +224,107 @@ namespace MakeItMoreDifficult
 				}
 			}
 			MelonLogger.Msg("Updated Customer spending cap");
-        }
+		}
 
 		private static void UpdateRent()
 		{
 			var list = GetOwnedProperties();
 			rent = 0;
-			foreach(var property in list)
+			foreach (var property in list)
 			{
 				PropertyValues.TryGetValue(property.propertyName, out int PropertyValue);
-				rent+= PropertyValue;
+				rent += PropertyValue;
 			}
 
 			MelonLogger.Msg("Current Rent: " + rent);
-        }
-
-		private static void UpdateStations()
-		{
-			//Il2CppScheduleOne.UI.Stations.LabOvenCanvas.instance.CanBegin()
 		}
 
 
-        private static List<Property> GetOwnedProperties()
+		private static List<Property> GetOwnedProperties()
 		{
 			var result = new List<Property>();
-			foreach(Property property in Property.Properties)
+			foreach (Property property in Property.Properties)
 			{
 				if (property.IsOwned)
 				{
 					result.Add(property);
-                    MelonLogger.Msg("Player owns " + property.propertyName);
-                }
-            }
+					MelonLogger.Msg("Player owns " + property.propertyName);
+				}
+			}
 			return result;
 		}
-		
+
 		private static TimeManager GetTimeManager()
 		{
 			return Object.FindObjectOfType<TimeManager>();
 
-        }
+		}
 
 		private static bool IsServer()
 		{
-            var nm = InstanceFinder.NetworkManager;
+			var nm = InstanceFinder.NetworkManager;
 			return nm.IsServer;
-        }
-    }
+		}
 
+        [HarmonyPatch(typeof(BrickPressCanvas), "BeginButtonPressed")]
+        internal static class BrickPressCanvasPatch
+        {
+            private static bool Prefix(BrickPressCanvas __instance)
+            {
+                return !GetTimeManager().IsEndOfDay;
+            }
+
+        }
+
+        [HarmonyPatch(typeof(CauldronCanvas), "BeginButtonPressed")]
+        internal static class CauldronCanvasPatch
+        {
+            private static bool Prefix(CauldronCanvas __instance)
+            {
+                return !GetTimeManager().IsEndOfDay;
+            }
+
+        }
+
+        [HarmonyPatch(typeof(ChemistryStationCanvas), "BeginButtonPressed")]
+        internal static class ChemistryStationCanvasPatch
+        {
+            private static bool Prefix(ChemistryStationCanvas __instance)
+            {
+                return !GetTimeManager().IsEndOfDay;
+            }
+
+        }
+
+        [HarmonyPatch(typeof(LabOvenCanvas), "BeginButtonPressed")]
+        internal static class LabOvenCanvasPatch
+        {
+            private static bool Prefix(LabOvenCanvas __instance)
+            {
+                return !GetTimeManager().IsEndOfDay;
+            }
+
+        }
+
+        [HarmonyPatch(typeof(MixingStationCanvas), "BeginButtonPressed")]
+        internal static class MixingStationCanvasPatch
+        {
+            private static bool Prefix(MixingStationCanvas __instance)
+            {
+                return !GetTimeManager().IsEndOfDay;
+            }
+
+        }
+ 
+
+        [HarmonyPatch(typeof(PackagingStationCanvas), "BeginButtonPressed")]
+		internal static class PackagingStationCanvasPatch
+		{
+			private static bool Prefix(PackagingStationCanvas __instance)
+			{
+				return !GetTimeManager().IsEndOfDay;
+			}
+
+		}
+    }
 }
