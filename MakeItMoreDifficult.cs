@@ -1,18 +1,13 @@
 using System;
 using System.Collections;
-using Il2CppInterop.Runtime.Injection;
 using Il2CppScheduleOne.GameTime;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppTMPro;
 using MelonLoader;
 using UnityEngine;
-using Il2CppScheduleOne;
 using Object = UnityEngine.Object;
 using Console = Il2CppScheduleOne.Console;
-using System.Runtime.InteropServices.ComTypes;
-using Unity.Jobs.LowLevel.Unsafe;
 using Il2CppScheduleOne.Economy;
-using Il2CppScheduleOne.Persistence.Datas;
 using System.Collections.Generic;
 using Il2CppScheduleOne.Property;
 using Il2CppScheduleOne.Persistence;
@@ -30,8 +25,6 @@ namespace MakeItMoreDifficult
 
 	public class Core : MelonMod
 	{
-		public static Core instance = null;
-
 		private static int rent = 6000;
 
         private static int debt = 0;
@@ -39,8 +32,6 @@ namespace MakeItMoreDifficult
 		private static bool hasPayedToday = false;
 
 		private static bool hasPlayerSpawned;
-
-		private bool inMainGame;
 
 		private static GameObject dayUIElement;
 
@@ -59,8 +50,6 @@ namespace MakeItMoreDifficult
 
 		public override void OnInitializeMelon()
 		{
-			instance = this;
-
 			propertyValues.Add("Motel Room", 75);
 			propertyValues.Add("Sweatshop", 800);
 			propertyValues.Add("Storage Unit", 5000);
@@ -70,30 +59,28 @@ namespace MakeItMoreDifficult
 
 			base.LoggerInstance.Msg("Loaded successfully!!");
 			Core.configCategory = MelonPreferences.CreateCategory("MakeItMoreDifficult");
-
 		}
+
 
 		public override void OnSceneWasLoaded(int buildIndex, string sceneName)
 		{
 			bool flag = sceneName == "Main";
 			if (flag)
 			{
-				this.inMainGame = true;
-
-
 				MelonCoroutines.Start(Core.WaitForPlayer());
 			}
 			else
 			{
-				this.inMainGame = false;
 				Core.hasPlayerSpawned = false;
 			}
 		}
+
 
 		public override void OnLateInitializeMelon()
 		{
 			LoadManager.Instance.onLoadComplete.AddListener((UnityAction)UpdateCalculations);
 		}
+
 
 		public override void OnUpdate()
 		{
@@ -137,6 +124,7 @@ namespace MakeItMoreDifficult
 			UpdateCustomerSpending();
 		}
 
+
 		private static IEnumerator OnPlayerSpawned()
 		{
 			yield return new WaitForSeconds(1f);
@@ -158,12 +146,11 @@ namespace MakeItMoreDifficult
 				SavedPosition = default(Vector3);
 			}
 
-
 			SetSleepButtonEnabled(false);
-
 
 			yield break;
 		}
+
 
 		private static void OnDayPass()
 		{
@@ -172,6 +159,7 @@ namespace MakeItMoreDifficult
 			hasPayedToday = false;
 			SetSleepButtonEnabled(false);
 		}
+
 
 		private static void SetSleepButtonEnabled(bool flag)
 		{
@@ -183,9 +171,9 @@ namespace MakeItMoreDifficult
 				sleepCanvas = Object.FindObjectOfType<SleepCanvas>();
 			}
 
-			MelonLogger.Msg("Set sleep button " + flag);
 			sleepCanvas.SleepButton.interactable = flag;
 		}
+
 
 		private static void ChangedayText()
 		{
@@ -213,17 +201,15 @@ namespace MakeItMoreDifficult
 				if (!customerOrigSpending.ContainsKey(customer))
 				{
 					customerOrigSpending.Add(customer, customer.CustomerData.MaxWeeklySpend);
-					//MelonLogger.Msg("!!  " + customer.name + ": Orig Spend Cap " + customer.CustomerData.MaxWeeklySpend);
 				}
 
 				if (customerOrigSpending.TryGetValue(customer, out float orig_value))
 				{
 					customer.customerData.MaxWeeklySpend = Mathf.Max(1f, Mathf.Pow(day, 1.5f) / 100f) * orig_value;
-					//MelonLogger.Msg(customer.name + ": New Spend Cap " + customer.CustomerData.MaxWeeklySpend);
 				}
 			}
-			MelonLogger.Msg("Updated Customer spending cap");
 		}
+
 
 		private static void UpdateRent()
 		{
@@ -253,11 +239,13 @@ namespace MakeItMoreDifficult
 			return result;
 		}
 
+
 		public static TimeManager GetTimeManager()
 		{
 			return Object.FindObjectOfType<TimeManager>();
 
 		}
+
 
 		private static bool IsServer()
 		{
