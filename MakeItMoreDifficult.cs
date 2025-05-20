@@ -35,42 +35,42 @@ namespace MakeItMoreDifficult
 
 		private static int rent = 6000;
 
-		public static int debt = 0;
+        private static int debt = 0;
 
-		private static bool HasPayedToday = false;
+		private static bool hasPayedToday = false;
 
-		private static bool HasPlayerSpawned;
+		private static bool hasPlayerSpawned;
 
-		private bool InMainGame;
+		private bool inMainGame;
 
-		private static GameObject DayUIElement;
+		private static GameObject dayUIElement;
 
-		private static TextMeshProUGUI DayText;
+		private static TextMeshProUGUI dayText;
 
-		private static MelonPreferences_Category ConfigCategory;
+		private static MelonPreferences_Category configCategory;
 
-		private static Vector3 DefaultPosition = new Vector3(550f, 510f, 0f);
+		private static Vector3 defaultPosition = new Vector3(550f, 510f, 0f);
 
-		public static Dictionary<Customer, float> customer_orig_spending = new Dictionary<Customer, float>();
+        private static Dictionary<Customer, float> customerOrigSpending = new Dictionary<Customer, float>();
 
-		public static Dictionary<string, int> PropertyValues = new Dictionary<string, int>();
+        private static Dictionary<string, int> propertyValues = new Dictionary<string, int>();
 
-		public static SleepCanvas sleepCanvas = null;
+        private static SleepCanvas sleepCanvas = null;
 
 
 		public override void OnInitializeMelon()
 		{
 			instance = this;
 
-			PropertyValues.Add("Motel Room", 75);
-			PropertyValues.Add("Sweatshop", 800);
-			PropertyValues.Add("Storage Unit", 5000);
-			PropertyValues.Add("Bungalow", 6000);
-			PropertyValues.Add("Barn", 25000);
-			PropertyValues.Add("Docks Warehouse", 50000);
+			propertyValues.Add("Motel Room", 75);
+			propertyValues.Add("Sweatshop", 800);
+			propertyValues.Add("Storage Unit", 5000);
+			propertyValues.Add("Bungalow", 6000);
+			propertyValues.Add("Barn", 25000);
+			propertyValues.Add("Docks Warehouse", 50000);
 
 			base.LoggerInstance.Msg("Loaded successfully!!");
-			Core.ConfigCategory = MelonPreferences.CreateCategory("MakeItMoreDifficult");
+			Core.configCategory = MelonPreferences.CreateCategory("MakeItMoreDifficult");
 
 		}
 
@@ -79,15 +79,15 @@ namespace MakeItMoreDifficult
 			bool flag = sceneName == "Main";
 			if (flag)
 			{
-				this.InMainGame = true;
+				this.inMainGame = true;
 
 
 				MelonCoroutines.Start(Core.WaitForPlayer());
 			}
 			else
 			{
-				this.InMainGame = false;
-				Core.HasPlayerSpawned = false;
+				this.inMainGame = false;
+				Core.hasPlayerSpawned = false;
 			}
 		}
 
@@ -104,10 +104,10 @@ namespace MakeItMoreDifficult
 			if (Input.GetKeyDown(KeyCode.L))
 				UpdateCalculations();
 
-			else if (Input.GetKeyDown(KeyCode.P) && !HasPayedToday)
+			else if (Input.GetKeyDown(KeyCode.P) && !hasPayedToday)
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
-				HasPayedToday = true;
+				hasPayedToday = true;
 				SetSleepButtonEnabled(true);
 			}
 		}
@@ -119,10 +119,10 @@ namespace MakeItMoreDifficult
 			{
 				yield return null;
 			}
-			bool flag = !Core.HasPlayerSpawned;
+			bool flag = !Core.hasPlayerSpawned;
 			if (flag)
 			{
-				Core.HasPlayerSpawned = true;
+				Core.hasPlayerSpawned = true;
 				MelonCoroutines.Start(Core.OnPlayerSpawned());
 
 			}
@@ -134,7 +134,7 @@ namespace MakeItMoreDifficult
 		{
 			MelonLogger.Msg("Update Calculations");
 			UpdateRent();
-			ChangeDayText();
+			ChangedayText();
 			UpdateCustomerSpending();
 		}
 
@@ -144,14 +144,14 @@ namespace MakeItMoreDifficult
 			bool flag = Player.Local.gameObject != null;
 			if (flag)
 			{
-				Core.DayUIElement = Object.Instantiate<GameObject>(GameObject.Find("UI/HUD/Background"));
+				Core.dayUIElement = Object.Instantiate<GameObject>(GameObject.Find("UI/HUD/Background"));
 				GameObject ParentObj = GameObject.Find("UI/HUD/");
-				Core.DayUIElement.transform.SetParent(ParentObj.transform);
-				Vector3 SavedPosition = new Vector3(DefaultPosition.x, DefaultPosition.y, 0f);
-				Core.DayUIElement.transform.localPosition = SavedPosition;
-				Core.DayUIElement.SetActive(true);
-				Core.DayUIElement.name = "MakeItMoreDifficult";
-				Core.DayText = GameObject.Find("UI/HUD/MakeItMoreDifficult/TopScreenText").GetComponent<TextMeshProUGUI>();
+				Core.dayUIElement.transform.SetParent(ParentObj.transform);
+				Vector3 SavedPosition = new Vector3(defaultPosition.x, defaultPosition.y, 0f);
+				Core.dayUIElement.transform.localPosition = SavedPosition;
+				Core.dayUIElement.SetActive(true);
+				Core.dayUIElement.name = "MakeItMoreDifficult";
+				Core.dayText = GameObject.Find("UI/HUD/MakeItMoreDifficult/TopScreenText").GetComponent<TextMeshProUGUI>();
 				GetTimeManager().onDayPass += new Action(Core.OnDayPass);
 				UpdateText(GetTimeManager());
 
@@ -169,8 +169,8 @@ namespace MakeItMoreDifficult
 		private static void OnDayPass()
 		{
 			UpdateCalculations();
-			ChangeDayText();
-			HasPayedToday = false;
+			ChangedayText();
+			hasPayedToday = false;
 			SetSleepButtonEnabled(false);
 		}
 
@@ -188,7 +188,7 @@ namespace MakeItMoreDifficult
 			sleepCanvas.SleepButton.interactable = flag;
 		}
 
-		private static void ChangeDayText()
+		private static void ChangedayText()
 		{
 			TimeManager timeManager = GetTimeManager();
 			if (timeManager != null)
@@ -201,7 +201,7 @@ namespace MakeItMoreDifficult
 			int day = timeManager.ElapsedDays + 1;
 			int tax = (int)(Mathf.Floor(Mathf.Pow(day * 5, 1.5f) / 5.0f) * 5);
 			debt = tax + rent;
-			Core.DayText.text = "Day #" + day.ToString() + " | $" + tax + " ( +$" + rent + " = $" + debt + " )";
+			Core.dayText.text = "Day #" + day.ToString() + " | $" + tax + " ( +$" + rent + " = $" + debt + " )";
 		}
 
 
@@ -211,13 +211,13 @@ namespace MakeItMoreDifficult
 
 			foreach (Customer customer in Customer.UnlockedCustomers)
 			{
-				if (!customer_orig_spending.ContainsKey(customer))
+				if (!customerOrigSpending.ContainsKey(customer))
 				{
-					customer_orig_spending.Add(customer, customer.CustomerData.MaxWeeklySpend);
+					customerOrigSpending.Add(customer, customer.CustomerData.MaxWeeklySpend);
 					//MelonLogger.Msg("!!  " + customer.name + ": Orig Spend Cap " + customer.CustomerData.MaxWeeklySpend);
 				}
 
-				if (customer_orig_spending.TryGetValue(customer, out float orig_value))
+				if (customerOrigSpending.TryGetValue(customer, out float orig_value))
 				{
 					customer.customerData.MaxWeeklySpend = Mathf.Max(1f, Mathf.Pow(day, 1.5f) / 100f) * orig_value;
 					//MelonLogger.Msg(customer.name + ": New Spend Cap " + customer.CustomerData.MaxWeeklySpend);
@@ -232,7 +232,7 @@ namespace MakeItMoreDifficult
 			rent = 0;
 			foreach (var property in list)
 			{
-				PropertyValues.TryGetValue(property.propertyName, out int PropertyValue);
+				propertyValues.TryGetValue(property.propertyName, out int PropertyValue);
 				rent += PropertyValue;
 			}
 
