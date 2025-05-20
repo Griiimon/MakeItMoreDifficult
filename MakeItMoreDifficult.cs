@@ -25,7 +25,7 @@ namespace MakeItMoreDifficult
 
 	public class Core : MelonMod
 	{
-		private static int rent = 6000;
+		private static int rent = 0;
 
         private static int debt = 0;
 
@@ -186,9 +186,9 @@ namespace MakeItMoreDifficult
 		private static void UpdateText(TimeManager timeManager)
 		{
 			int day = timeManager.ElapsedDays + 1;
-			int tax = (int)(Mathf.Floor(Mathf.Pow(day * 5, 1.5f) / 5.0f) * 5);
-			debt = tax + rent;
-			Core.dayText.text = "Day #" + day.ToString() + " | $" + tax + " ( +$" + rent + " = $" + debt + " )";
+			int protectionAndBribes = (int)(Mathf.Floor(Mathf.Pow(day * 5, 1.5f) / 5.0f) * 5);
+			debt = protectionAndBribes + rent;
+			Core.dayText.text = "Day #" + day.ToString() + " | $" + debt + " ($" + rent + " + $" + protectionAndBribes + ")";
 		}
 
 
