@@ -19,8 +19,7 @@ using Il2CppScheduleOne.Persistence;
 using UnityEngine.Events;
 using Il2CppScheduleOne.UI;
 using Il2CppFishNet;
-using Il2CppScheduleOne.UI.Stations;
-using HarmonyLib;
+
 
 [assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.3.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
@@ -254,7 +253,7 @@ namespace MakeItMoreDifficult
 			return result;
 		}
 
-		private static TimeManager GetTimeManager()
+		public static TimeManager GetTimeManager()
 		{
 			return Object.FindObjectOfType<TimeManager>();
 
@@ -266,65 +265,5 @@ namespace MakeItMoreDifficult
 			return nm.IsServer;
 		}
 
-        [HarmonyPatch(typeof(BrickPressCanvas), "BeginButtonPressed")]
-        internal static class BrickPressCanvasPatch
-        {
-            private static bool Prefix(BrickPressCanvas __instance)
-            {
-                return !GetTimeManager().IsEndOfDay;
-            }
-
-        }
-
-        [HarmonyPatch(typeof(CauldronCanvas), "BeginButtonPressed")]
-        internal static class CauldronCanvasPatch
-        {
-            private static bool Prefix(CauldronCanvas __instance)
-            {
-                return !GetTimeManager().IsEndOfDay;
-            }
-
-        }
-
-        [HarmonyPatch(typeof(ChemistryStationCanvas), "BeginButtonPressed")]
-        internal static class ChemistryStationCanvasPatch
-        {
-            private static bool Prefix(ChemistryStationCanvas __instance)
-            {
-                return !GetTimeManager().IsEndOfDay;
-            }
-
-        }
-
-        [HarmonyPatch(typeof(LabOvenCanvas), "BeginButtonPressed")]
-        internal static class LabOvenCanvasPatch
-        {
-            private static bool Prefix(LabOvenCanvas __instance)
-            {
-                return !GetTimeManager().IsEndOfDay;
-            }
-
-        }
-
-        [HarmonyPatch(typeof(MixingStationCanvas), "BeginButtonPressed")]
-        internal static class MixingStationCanvasPatch
-        {
-            private static bool Prefix(MixingStationCanvas __instance)
-            {
-                return !GetTimeManager().IsEndOfDay;
-            }
-
-        }
- 
-
-        [HarmonyPatch(typeof(PackagingStationCanvas), "BeginButtonPressed")]
-		internal static class PackagingStationCanvasPatch
-		{
-			private static bool Prefix(PackagingStationCanvas __instance)
-			{
-				return !GetTimeManager().IsEndOfDay;
-			}
-
-		}
     }
 }
