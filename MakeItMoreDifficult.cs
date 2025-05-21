@@ -25,6 +25,8 @@ namespace MakeItMoreDifficult
 
 	public class Core : MelonMod
 	{
+		public static Core instance = null;
+
 		private static int rent = 0;
 
         private static int debt = 0;
@@ -50,6 +52,8 @@ namespace MakeItMoreDifficult
 
 		public override void OnInitializeMelon()
 		{
+			instance = this;
+
 			propertyValues.Add("Motel Room", 75);
 			propertyValues.Add("Sweatshop", 800);
 			propertyValues.Add("Storage Unit", 5000);
