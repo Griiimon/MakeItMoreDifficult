@@ -1,12 +1,16 @@
 ﻿
 
 using HarmonyLib;
+using Il2CppFishNet;
+using Il2CppScheduleOne.Persistence.Datas;
+using Il2CppScheduleOne.Quests;
 using Il2CppScheduleOne.UI.Stations;
-
-
+using MelonLoader;
 
 namespace MakeItMoreDifficult
 {
+    #region Stations
+
     [HarmonyPatch(typeof(BrickPressCanvas), "BeginButtonPressed")]
     internal static class BrickPressCanvasPatch
     {
@@ -67,4 +71,47 @@ namespace MakeItMoreDifficult
         }
 
     }
+
+    #endregion
+
+    #region Quests
+    [HarmonyPatch(typeof(Quest_WelcomeToHylandPoint), "Update")]
+    internal static class WelcomeToHylandPointPatch
+    {
+        private static bool Prefix(Quest_WelcomeToHylandPoint __instance)
+        {
+            if (__instance.QuestState != EQuestState.Active || !InstanceFinder.IsServer)
+                return false;
+
+            if (__instance.ReadMessagesQuest.State == EQuestState.Active)
+            {
+                Core.instance.LoggerInstance.Msg("Destroy RV");
+                __instance.ReadMessagesQuest.Complete();
+                __instance.ReturnToRVQuest.Complete();
+            }
+
+            return false;
+        }
+
+    }
+
+/*    [HarmonyPatch(typeof(Quest), "InitializeQuest")]
+    internal static class InitializeQuestPatch
+    {
+        private static bool Prefix(Quest __instance)
+        {
+            if (__instance.title == "Getting Started")
+            {
+                __instance.Entries.Clear();
+                Core.instance.LoggerInstance.Msg("Getting Started Quest Patched");
+                return false;
+            }
+
+            return true;
+        }
+
+    }
+*/
+
+    #endregion
 }
