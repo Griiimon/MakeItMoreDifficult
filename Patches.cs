@@ -6,6 +6,8 @@ using Il2CppScheduleOne.Persistence.Datas;
 using Il2CppScheduleOne.Quests;
 using Il2CppScheduleOne.UI.Stations;
 using MelonLoader;
+using Console = Il2CppScheduleOne.Console;
+
 
 namespace MakeItMoreDifficult
 {
@@ -89,6 +91,8 @@ namespace MakeItMoreDifficult
                 __instance.ReadMessagesQuest.Complete();
                 __instance.ReturnToRVQuest.Complete();
             }
+
+            Console.SubmitCommand("changecash -1000");
 
             return false;
         }
