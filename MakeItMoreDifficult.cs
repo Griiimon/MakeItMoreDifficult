@@ -14,7 +14,7 @@ using Il2CppScheduleOne.Persistence;
 using UnityEngine.Events;
 using Il2CppScheduleOne.UI;
 using Il2CppFishNet;
-
+using Il2CppScheduleOne.Money;
 
 [assembly: MelonInfo(typeof(MakeItMoreDifficult.Core), "MakeItMoreDifficult", "0.3.0", "Griiimon")]
 [assembly: MelonGame(null, null)]
@@ -94,7 +94,7 @@ namespace MakeItMoreDifficult
 			if (Input.GetKeyDown(KeyCode.L))
 				UpdateCalculations();
 
-			else if (Input.GetKeyDown(KeyCode.P) && !hasPayedToday)
+			else if (Input.GetKeyDown(KeyCode.P) && !hasPayedToday && MoneyManager.Instance.cashBalance >= Core.debt)
 			{
 				Console.SubmitCommand("changecash -" + Core.debt);
 				hasPayedToday = true;
