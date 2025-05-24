@@ -96,7 +96,9 @@ namespace MakeItMoreDifficult
 
 			else if (Input.GetKeyDown(KeyCode.P) && !hasPayedToday && MoneyManager.Instance.cashBalance >= Core.debt)
 			{
-				Console.SubmitCommand("changecash -" + Core.debt);
+				MoneyManager.Instance.ChangeCashBalance(-Core.debt);
+
+                //Console.SubmitCommand("changecash -" + Core.debt);
 				hasPayedToday = true;
 				SetSleepButtonEnabled(true);
 			}
