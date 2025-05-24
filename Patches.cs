@@ -139,21 +139,16 @@ namespace MakeItMoreDifficult
         {
             var list = new Il2CppSystem.Collections.Generic.List<string>();
             float num = 0f;
-            //Crime[] array = crimes.Keys.ToArray();
-            Core.instance.LoggerInstance.Msg("Total Crimes " + crimes.Keys.Count);
+
             var keys = new List<Crime>();
             foreach (var kvp in ((Il2CppSystem.Collections.Generic.Dictionary<Crime, int>)crimes))
             {
-                Core.instance.LoggerInstance.Msg("Crime " + kvp.Key.CrimeName);
                 keys.Add(kvp.Key);
             }
             Crime[] array = keys.ToArray();
 
             for (int i = 0; i < array.Length; i++)
             {
-                Core.instance.LoggerInstance.Msg("Array Crime " + array[i].CrimeName);
-                Core.instance.LoggerInstance.Msg(" Class " + array[i].ObjectClass.ToString());
-
                 if (array[i].CrimeName == "Possession of controlled substances")
                 {
                     float num2 = 5f * (float)crimes[array[i]];
@@ -164,7 +159,6 @@ namespace MakeItMoreDifficult
                 {
                     float num3 = 10f * (float)crimes[array[i]];
                     num += num3;
-                    Core.instance.LoggerInstance.Msg("hit");
                     list.Add(crimes[array[i]] + " low-severity drugs confiscated");
                 }
                 else if (array[i].CrimeName == "Possession of moderate-severity drug")
@@ -172,7 +166,6 @@ namespace MakeItMoreDifficult
                     float num4 = 20f * (float)crimes[array[i]];
                     num += num4;
                     list.Add(crimes[array[i]] + " moderate-severity drugs confiscated");
-                    Core.instance.LoggerInstance.Msg("hit");
                 }
                 else if (array[i].CrimeName == "Possession of high-severity drug")
                 {
@@ -199,7 +192,6 @@ namespace MakeItMoreDifficult
                 else if (array[i].CrimeName == "Assault")
                 {
                     num += 75f;
-                    Core.instance.LoggerInstance.Msg("hit");
                 }
                 else if (array[i].CrimeName == "Assault with a deadly weapon")
                 {
@@ -223,18 +215,17 @@ namespace MakeItMoreDifficult
                 }
             }
 
-            Core.instance.LoggerInstance.Msg("Total list" + list.Count);
-            Core.instance.LoggerInstance.Msg("Orig fine" + num);
-
+            Core.instance.LoggerInstance.Msg("Original fine" + num);
 
             num *= 10f;
+
+            Core.instance.LoggerInstance.Msg("Patched fine" + num);
 
             if (num > 0f)
             {
                 float cash = Mathf.Min(num, NetworkSingleton<MoneyManager>.Instance.cashBalance);
                 float transfer = 0f;
                 if (cash < num)
-                    //transfer= Mathf.Min(num - cash, NetworkSingleton<MoneyManager>.Instance.SyncAccessor_onlineBalance)
                     transfer = num - cash;
 
                 string text = MoneyManager.FormatAmount(num, showDecimals: true) + " fine";
