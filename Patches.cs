@@ -2,10 +2,13 @@
 
 using HarmonyLib;
 using Il2CppFishNet;
+using Il2CppScheduleOne.EntityFramework;
 using Il2CppScheduleOne.Persistence.Datas;
+using Il2CppScheduleOne.Property;
 using Il2CppScheduleOne.Quests;
 using Il2CppScheduleOne.UI.Stations;
 using MelonLoader;
+using UnityEngine;
 using Console = Il2CppScheduleOne.Console;
 
 
@@ -80,42 +83,45 @@ namespace MakeItMoreDifficult
     [HarmonyPatch(typeof(Quest_WelcomeToHylandPoint), "Update")]
     internal static class WelcomeToHylandPointPatch
     {
+        private static bool objectsAreRemoved = false;
+
         private static bool Prefix(Quest_WelcomeToHylandPoint __instance)
         {
-            if (__instance.QuestState != EQuestState.Active || !InstanceFinder.IsServer)
+            if (__instance.QuestState != EQuestState.Active)// || !InstanceFinder.IsServer)
                 return false;
 
-            if (__instance.ReadMessagesQuest.State == EQuestState.Active)
-            {
-                Core.instance.LoggerInstance.Msg("Destroy RV");
-                __instance.ReadMessagesQuest.Complete();
-                __instance.ReturnToRVQuest.Complete();
-            }
+    
+            if(!objectsAreRemoved)
+                RemoveObjects(__instance.RV);
 
+            // TODO use money manager
             Console.SubmitCommand("changecash -1000");
-
-            return false;
-        }
-
-    }
-
-/*    [HarmonyPatch(typeof(Quest), "InitializeQuest")]
-    internal static class InitializeQuestPatch
-    {
-        private static bool Prefix(Quest __instance)
-        {
-            if (__instance.title == "Getting Started")
-            {
-                __instance.Entries.Clear();
-                Core.instance.LoggerInstance.Msg("Getting Started Quest Patched");
-                return false;
-            }
 
             return true;
         }
 
+        private static void RemoveObjects(RV rv)
+        {
+            string[] objectNames = { "@Properties/RV/RV/SM_Prop_Tarp_Generic_01", "@Properties/RV/RV/SM_Item_Radio_01", "@Properties/RV/RV/Vase", "@Properties/RV/RV/rv/Main/Interior/Bench/", "@Properties/RV/RV/rv/Main/Interior/Cabinets/", "@Properties/RV/RV/rv/Main/Interior/Bed/", "@Properties/RV/RV/Ashtray", "@Properties/RV/RV/Bedside_Table/", "@Properties/RV/RV/Container/Grid (1)/", "@Properties/RV/RV/rv/Main/Wall.001/" };
+            foreach(string objName in objectNames)
+            {
+                GameObject gameObject = GameObject.Find(objName);
+                if (gameObject != null)
+                    gameObject.SetActive(false);
+            }
+
+            while(rv.BuildableItems.Count > 0)
+            {
+                BuildableItem item = rv.BuildableItems[0];
+                item.DestroyItem();
+            }
+        
+            objectsAreRemoved = true;
+        }
+
     }
-*/
+
+
 
     #endregion
 }
